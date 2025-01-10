@@ -182,8 +182,9 @@ while err > errTol && iter <= MaxIter
         vY(t) = vA(t) * vK(t)^params.pAlpha * vL(t)^(1-params.pAlpha);
         vI(t) = vY(t) - Cfoc;
 
-        % update state path and consumption path where the latter is done over the updated state path
-        % compute new updated state value and consumption value given new state 
+        % update deterministic state path and consumption path where the latter is done over the updated state path
+        % update state path by simulating forward capital accumulation imposing MCC and FOC
+        % simulated capital path is consistent with optimal choices at t-1 and nonlinear 
         if t == 1
             vKnew(t) = (1-params.pDelta)*ss.K + ss.I; % for t=1 use SS values always 
         else
