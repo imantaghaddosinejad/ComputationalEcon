@@ -85,7 +85,7 @@ vA = vGridA(ivA);
 % mTransActual(end, 1) = mPA(ivA(T), ivA(T)); % for final period assume same realised a for T+1 (natrual terinal SS boundary)
 
 % guess path for variables (initital path)
-vK = ss.K .* ones(T, 1) + normrnd(0, 0.000001, T, 1); % purturbe K around SS for algorithm to work
+vK = ss.K .* ones(T, 1) + normrnd(0, 0.000001, T, 1); % perturbe K around SS for algorithm to work
 vC = ss.C .* ones(T,1); % guess C initially flat (at SS) 
 vL = ss.L .* ones(T,1);%(((1/params.pEta) .* (1-params.pAlpha) .* vA .* vK.^params.pAlpha) ./ vC.^params.pRiskAversion).^(params.pFrisch/(1 + params.pFrisch*params.pAlpha));
 vY = ss.Y .* ones(T,1);%vA .* vK.^(params.pAlpha) .* vL.^(1-params.pAlpha);
