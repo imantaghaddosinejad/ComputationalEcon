@@ -1,4 +1,4 @@
-%% Solving Canonical RBC Model Using Nonlinear Global Solution Method %%%%%
+%% Solving Canonical RBC Model Using Repeated Transition Method  %%%%%%%%%%
 %
 % 2025.01.10
 % Author @ iman Taghaddosinejad (github.com/imantaghaddosinejad)
