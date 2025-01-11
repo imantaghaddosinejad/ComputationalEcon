@@ -91,23 +91,23 @@ for t = 1:T
 end
 
 % guess initial solution path
-vK = ss.K .* ones(T, 1) + normrnd(0, 0.0001, T, 1); % perturbe K around SS for algorithm to work
+vK = ss.K .* ones(T, 1) + normrnd(0, 0.0000001, T, 1); % perturbe K around SS for algorithm to work
 vC = ss.C .* ones(T,1); % guess C initially flat (at SS) 
-vL = ss.L .* ones(T,1); % (((1-pAlpha) .* vA .* vK.^pAlpha)./(pEta*vC.^pRiskAversion))^(pFrisch/(1+pFrisch*pAlpha);
-vY = ss.Y .* ones(T,1); % vA.*vK.^(pAlpha).*vL.^(1-pAlpha);
-vr = ss.r .* ones(T,1); % pAlpha.*vA.*(vK./vL).^(pAlpha-1) - pDelta;
-vw = ss.w .* ones(T,1); % (1-pAlpha).*vA.*(vK./vL).^pAlpha;
-vI = ss.I .* ones(T,1); % pDelta.*vK;
+% vL = ss.L .* ones(T,1); % (((1-pAlpha) .* vA .* vK.^pAlpha)./(pEta*vC.^pRiskAversion))^(pFrisch/(1+pFrisch*pAlpha);
+% vY = ss.Y .* ones(T,1); % vA.*vK.^(pAlpha).*vL.^(1-pAlpha);
+% vr = ss.r .* ones(T,1); % pAlpha.*vA.*(vK./vL).^(pAlpha-1) - pDelta;
+% vw = ss.w .* ones(T,1); % (1-pAlpha).*vA.*(vK./vL).^pAlpha;
+% vI = ss.I .* ones(T,1); % pDelta.*vK;
 
-% vL = (((1-pAlpha).*ss.A.*vK.^pAlpha)./(pEta.*vC.^pRiskAversion)).^(pFrisch/(1+pFrisch*pAlpha));
-% vY = ss.A.*vK.^(pAlpha).*vL.^(1-pAlpha);
-% vr = pAlpha.*ss.A.*(vK./vL).^(pAlpha-1) - pDelta;
-% vw = (1-pAlpha).*ss.A.*(vK./vL).^pAlpha;
-% vI = pDelta.*vK;
+vL = (((1-pAlpha).*ss.A.*vK.^pAlpha)./(pEta.*vC.^pRiskAversion)).^(pFrisch/(1+pFrisch*pAlpha));
+vY = ss.A.*vK.^(pAlpha).*vL.^(1-pAlpha);
+vr = pAlpha.*ss.A.*(vK./vL).^(pAlpha-1) - pDelta;
+vw = (1-pAlpha).*ss.A.*(vK./vL).^pAlpha;
+vI = pDelta.*vK;
 
 % placeholder variables used for updating anchor variables 
 vKnew = zeros(T,1); 
-vCnew = ss.K.*ones(T,1);
+vCnew = ss.C.*ones(T,1);
 
 % RTM loop parameters 
 errTol = 1e-8;
@@ -125,28 +125,26 @@ while err > errTol && iter <= MaxIter
     % BACKWARD SOLUTION FOR EXPECTATION TERM (BELIEFS)
     % ============================================================
 
-    % future values for relevant aggregate state variables 
-    vKprime = [vK(2:end);vK(1)];
-    %vKprime = vK(viFutureT);
-    %vKprime(end) = vK(1); % anchor beyond the simulated path K(T+1) at K(1) which will converge to SS-K 
+    % update future K path
+    vKprime = [vK(2:end);vK(1)]; % anchor beyond the simulated path K(T+1) at K(1) which will converge to SS-K 
 
     vV1 = 0; % reset expectaion term for current iteration 
     for iAprime = 1:params.pNA
         
         % find all (K,A) pairs in simulated path for counterfactual (unrealized) future state  
-        Aprime = vGridA(iAprime); % unrealized future TFP shoc
-        vCan = vK(find(ivA == iAprime));
-        vCanLoc = find(ivA == iAprime);
-
-        vCan(vCanLoc > T-BURNT) = [];
-        vCan(vCanLoc < BURNT) = [];
+        Aprime = vGridA(iAprime); % unrealized future TFP shock
+        
+        % vCan = vK(find(ivA == iAprime));
+        % vCanLoc = find(ivA == iAprime);
+        % vCan(vCanLoc > T-BURNT) = [];
+        % vCan(vCanLoc < BURNT) = [];
+        % vCanLoc(vCanLoc > T-BURNT) = []; % eliminate all candidate locations (time periods) that fall inside burn period
+        % vCanLoc(vCanLoc < BURNT) = []; % eliminate all candidate locations (time periods) that fall inside burn period
+        
+        vCanLoc = find(ivA == iAprime); % all time periods with counterfactual shock realized
         vCanLoc(vCanLoc > T-BURNT) = []; % eliminate all candidate locations (time periods) that fall inside burn period
         vCanLoc(vCanLoc < BURNT) = []; % eliminate all candidate locations (time periods) that fall inside burn period
-        
-        %vCanLoc = find(ivA == iAprime); % all time periods with counterfactual shock realized
-        %vCanLoc(vCanLoc > T-BURNT) = []; % eliminate all candidate locations (time periods) that fall inside burn period
-        %vCanLoc(vCanLoc < BURNT) = []; % eliminate all candidate locations (time periods) that fall inside burn period
-        %vCan = vK(vCanLoc); % value of capital stock (K) at all counterfactual shock realizations
+        vCan = vK(vCanLoc); % value of capital stock (K) at all counterfactual shock realizations
         [vCan, index] = sort(vCan); % sort K vector to interpolate Kprime over 
         vCanLoc = vCanLoc(index); % order candidate location according to sorted K index 
         
@@ -160,9 +158,7 @@ while err > errTol && iter <= MaxIter
         wtLow(wtLow<0) = 0; % snap lower weight to 0 if Kprime falls above possible candidates 
         wtHigh = 1 - wtLow; % weight of associated with closest from above K candidate to Kprime 
         
-        % compute value of controls in expectation term for all time t 
-        % associated with future unrealized state vector (Kprime,Aprime)
-        % value of controls are computed using linear interpolation 
+        % interpolate controls in expectation term for unrealized future state (Kprime,Aprime)        
         vCLow = vC(vCanLoc(nLow));
         vCHigh = vC(vCanLoc(nHigh));
         vLLow = (((1-pAlpha).*Aprime.*vKprime.^pAlpha) ./ (pEta.*vCLow.^pRiskAversion)).^(pFrisch/(1+pFrisch*pAlpha));
@@ -189,9 +185,7 @@ while err > errTol && iter <= MaxIter
     % ============================================================
 
     % given expectation term (beliefs) solve forward for optimal
-    % controls (endog. variables) path imposing FOCs and MCC. This
-    % essentially updates the variable path for controls (not including 
-    % endog. aggregate state path (K) or anchor variable(s) (C))
+    % controls path imposing FOCs and MCC given current state (K,A)    
     vCfoc = (1./vV1).^(1/pRiskAversion);
     vL = (((1-pAlpha).*vA.*vK.^pAlpha) ./ (pEta.*vCfoc.^pRiskAversion)).^(pFrisch/(1+pFrisch*pAlpha));
     vr = pAlpha.*vA.*(vK./vL).^(pAlpha-1) - pDelta;
@@ -203,8 +197,7 @@ while err > errTol && iter <= MaxIter
     % SIMULATE FORWARD
     % ============================================================
 
-    % simulate forward endog. aggregate state (nonlinearly) using optimal
-    % decision rule over controls 
+    % simulate forward endog. aggregate state (nonlinearly)    
     vKPast = [ss.K;vK(1:end-1)]; % lagged capital path anchored at SS-K
     vIPast = [ss.I;vI(1:end-1)]; % lagged investment path anchored at SS-I
     vKnew = (1-pDelta).*vKPast + vIPast;
@@ -232,7 +225,7 @@ while err > errTol && iter <= MaxIter
     % ============================================================
     
     timer = toc;
-    if mod(iter, 50)==0
+    if mod(iter, 100)==0
         fprintf('Iteration %d. after %.2fs. MSE: %.10f\n', iter, timer, err);
         fprintf('MSE_C: %.6f. MSE_K: %.6f\n', MSE_C, MSE_K);
         fprintf('----------------------------------------\n')
