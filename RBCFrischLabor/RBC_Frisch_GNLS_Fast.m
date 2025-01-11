@@ -1,6 +1,6 @@
 %% Solving Canonical RBC Model Using Nonlinear Global Solution Method %%%%%
 %
-% 2025.01.10
+% 2025.01.11
 % Author @ iman Taghaddosinejad (github.com/imantaghaddosinejad)
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
