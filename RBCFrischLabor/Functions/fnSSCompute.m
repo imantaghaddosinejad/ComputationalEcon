@@ -40,7 +40,7 @@ function [ssL, ssK, ssC, ssY, ssI, ssr, ssw, pFrisch] = fnSSCompute(params, ss, 
     % SS per capita ratios - not dependent on Frisch elasticity directly 
     ssr = 1/pBeta - 1;
     R = ssr + pDelta;
-    ssK2L = (R / pAlpha*ssA)^(1 / (pAlpha - 1));
+    ssK2L = (R/(pAlpha*ssA))^(1 / (pAlpha - 1));
     ssw = (1-pAlpha) * ssA * (ssK2L)^pAlpha;
 
     if calib
