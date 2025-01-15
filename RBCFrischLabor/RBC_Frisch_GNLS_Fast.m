@@ -93,12 +93,6 @@ end
 % guess initial solution path
 vK = ss.K .* ones(T, 1) + normrnd(0, 0.0000001, T, 1); % perturbe K around SS for algorithm to work
 vC = ss.C .* ones(T,1); % guess C initially flat (at SS) 
-% vL = ss.L .* ones(T,1); % (((1-pAlpha) .* vA .* vK.^pAlpha)./(pEta*vC.^pRiskAversion))^(pFrisch/(1+pFrisch*pAlpha);
-% vY = ss.Y .* ones(T,1); % vA.*vK.^(pAlpha).*vL.^(1-pAlpha);
-% vr = ss.r .* ones(T,1); % pAlpha.*vA.*(vK./vL).^(pAlpha-1) - pDelta;
-% vw = ss.w .* ones(T,1); % (1-pAlpha).*vA.*(vK./vL).^pAlpha;
-% vI = ss.I .* ones(T,1); % pDelta.*vK;
-
 vL = (((1-pAlpha).*ss.A.*vK.^pAlpha)./(pEta.*vC.^pRiskAversion)).^(pFrisch/(1+pFrisch*pAlpha));
 vY = ss.A.*vK.^(pAlpha).*vL.^(1-pAlpha);
 vr = pAlpha.*ss.A.*(vK./vL).^(pAlpha-1) - pDelta;
@@ -122,34 +116,31 @@ tic;
 while err > errTol && iter <= MaxIter
 
     % ============================================================
-    % BACKWARD SOLUTION FOR EXPECTATION TERM (BELIEFS)
+    % TEP 1. BACKWARD SOLVE FOR BELIEFS (EXPECTATION TERM)
     % ============================================================
 
-    % update future K path
+    % update future endog. state K path
     vKprime = [vK(2:end);vK(1)]; % anchor beyond the simulated path K(T+1) at K(1) which will converge to SS-K 
 
+    % compute beliefs over counterfactual states (unrealized)
     vV1 = 0; % reset expectaion term for current iteration 
     for iAprime = 1:params.pNA
-        
-        % find all (K,A) pairs in simulated path for counterfactual (unrealized) future state  
+
+        % counterfactual exog. shock
         Aprime = vGridA(iAprime); % unrealized future TFP shock
         
-        % vCan = vK(find(ivA == iAprime));
-        % vCanLoc = find(ivA == iAprime);
-        % vCan(vCanLoc > T-BURNT) = [];
-        % vCan(vCanLoc < BURNT) = [];
-        % vCanLoc(vCanLoc > T-BURNT) = []; % eliminate all candidate locations (time periods) that fall inside burn period
-        % vCanLoc(vCanLoc < BURNT) = []; % eliminate all candidate locations (time periods) that fall inside burn period
-        
+        % location (time period) of when counterfactual was realized over simulated path
         vCanLoc = find(ivA == iAprime); % all time periods with counterfactual shock realized
         vCanLoc(vCanLoc > T-BURNT) = []; % eliminate all candidate locations (time periods) that fall inside burn period
         vCanLoc(vCanLoc < BURNT) = []; % eliminate all candidate locations (time periods) that fall inside burn period
-        vCan = vK(vCanLoc); % value of capital stock (K) at all counterfactual shock realizations
-        [vCan, index] = sort(vCan); % sort K vector to interpolate Kprime over 
-        vCanLoc = vCanLoc(index); % order candidate location according to sorted K index 
+        
+        % K-value candidates for counterfactual, i.e. (K',A') states
+        vCan = vK(vCanLoc);
+        [vCan, index] = sort(vCan); % sort K vector to interpolate vKprime over 
+        vCanLoc = vCanLoc(index); % order candidate location according to sorted K index (size) 
         
         % interpolate Kprime on plausible candidate locations 
-        nLow = sum(repmat(vCan', length(vKprime), 1) < vKprime, 2); % identify all K candidates closest from below to Kprime
+        nLow = sum(repmat(vCan', T, 1) < vKprime, 2); % identify all K candidates closest from below to Kprime
         nLow(nLow <= 1) = 1; % snap to lower limit index if Kprime is below all possible candidates
         nLow(nLow >= length(index)) = length(index) - 1; % snap to second largest index if Kprime is above all possible candidates 
         nHigh = nLow + 1; % position of closes K candidate from above to Kprime 
@@ -157,8 +148,8 @@ while err > errTol && iter <= MaxIter
         wtLow(wtLow>1) = 1; % snap lower weight to 1 if Kprime falls below possible candidates 
         wtLow(wtLow<0) = 0; % snap lower weight to 0 if Kprime falls above possible candidates 
         wtHigh = 1 - wtLow; % weight of associated with closest from above K candidate to Kprime 
-        
-        % interpolate controls in expectation term for unrealized future state (Kprime,Aprime)        
+
+        % linearly interpolate beliefs (RHS of Euler) given counterfactual
         vCLow = vC(vCanLoc(nLow));
         vCHigh = vC(vCanLoc(nHigh));
         vLLow = (((1-pAlpha).*Aprime.*vKprime.^pAlpha) ./ (pEta.*vCLow.^pRiskAversion)).^(pFrisch/(1+pFrisch*pAlpha));
@@ -166,14 +157,14 @@ while err > errTol && iter <= MaxIter
         vrLow = pAlpha.*Aprime.*(vKprime./vLLow).^(pAlpha-1) - pDelta;
         vrHigh = pAlpha.*Aprime.*(vKprime./vLHigh).^(pAlpha-1) - pDelta;
         
-        % cumulatively compute expectation term for counterfactuals (beliefs)
+        % cumulatively updated beliefs for counterfactual
         vV1 = vV1 + ... 
             (ivAFuture ~= iAprime) .* ... % only add term if tomorrow's state is unrealised 
             pBeta .* mPA(ivA, iAprime) .* ...
             (wtLow.*(1+vrLow)./(vCLow.^pRiskAversion) + wtHigh.*(1+vrHigh)./(vCHigh.^pRiskAversion));    
     end
     
-     % fill in realized component of expectation term (cumulatively)
+     % cumulatively update beliefs for actual realised future states 
      vLFuture = (((1-pAlpha).*vAFuture.*vKprime.^pAlpha) ./ (pEta.*vC(viFutureT).^pRiskAversion)).^(pFrisch/(1+pFrisch*pAlpha));
      vrFuture = pAlpha.*vAFuture.*(vKprime./vLFuture).^(pAlpha-1) - pDelta;
      vV1 = vV1 + ...
@@ -181,12 +172,10 @@ while err > errTol && iter <= MaxIter
          (1+vrFuture)./(vC(viFutureT).^pRiskAversion);
     
     % ============================================================
-    % OPTIMAL BACKWARD SOLUTION FOR CONTROLS (FOCs & MCCs HOLD)
+    % STEP 2. GIVEN BELIEFS OPTIMALLY SOLVE (BACKWARD) FOR CONTROLS
     % ============================================================
 
-    % given expectation term (beliefs) solve forward for optimal
-    % controls path imposing FOCs and MCC given current state (K,A)    
-    vCfoc = (1./vV1).^(1/pRiskAversion);
+    vCfoc = (1./vV1).^(1/pRiskAversion); % solution imposes FOCs and MCC given current state (K,A)
     vL = (((1-pAlpha).*vA.*vK.^pAlpha) ./ (pEta.*vCfoc.^pRiskAversion)).^(pFrisch/(1+pFrisch*pAlpha));
     vr = pAlpha.*vA.*(vK./vL).^(pAlpha-1) - pDelta;
     vw = (1-pAlpha).*vA.*(vK./vL).^pAlpha;
@@ -194,29 +183,24 @@ while err > errTol && iter <= MaxIter
     vI = vY - vCfoc;
     
     % ============================================================
-    % SIMULATE FORWARD
+    % STEP 3. SIMULATE FORWARD OPTIMAL NONLINEAR PATH OF CAPITAL
     % ============================================================
 
-    % simulate forward endog. aggregate state (nonlinearly)    
-    vKPast = [ss.K;vK(1:end-1)]; % lagged capital path anchored at SS-K
-    vIPast = [ss.I;vI(1:end-1)]; % lagged investment path anchored at SS-I
+    vKPast = [ss.K;vK(1:end-1)]; % lagged K anchored on SS value for t=0 
+    vIPast = [ss.I;vI(1:end-1)]; % lagged I anchored on SS value for t=0 
     vKnew = (1-pDelta).*vKPast + vIPast;
-
-    % new optimal (anchor) variable (C) given simulated/updated aggregate state path
     vCnew = vA.*vKnew.^pAlpha.*vL.^(1-pAlpha) - vI; % (L,I) path is optimal (satisfied FOCs and MCCs) for a converged aggregate state (K,A)
 
     % ============================================================
-    % COMPUTE MSE FOR NEW UPDATED PATH
+    % STEP 4. COMPUTE MSE GIVEN NEW PATH AND UPDATE (C,K) PATH 
     % ============================================================
-    
+
+    % compute error 
     MSE_C = mean((vC - vCnew).^2);
     MSE_K = mean((vK - vKnew).^2);
     err = mean([vC-vCnew; vK-vKnew].^2);
-    
-    % ============================================================
-    % UPDATE (C,K) PATH
-    % ============================================================
-    
+
+    % update path
     vK = wtOldK.*vK + (1-wtOldK).*vKnew;
     vC = wtOldC.*vC + (1-wtOldC).*vCnew;
 
