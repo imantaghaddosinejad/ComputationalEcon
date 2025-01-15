@@ -116,7 +116,7 @@ tic;
 while err > errTol && iter <= MaxIter
 
     % ============================================================
-    % TEP 1. BACKWARD SOLVE FOR BELIEFS (EXPECTATION TERM)
+    % STEP 1. BACKWARD SOLVE FOR BELIEFS (EXPECTATION TERM)
     % ============================================================
 
     % update future endog. state K path
