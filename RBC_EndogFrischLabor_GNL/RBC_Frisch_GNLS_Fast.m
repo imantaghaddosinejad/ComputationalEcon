@@ -10,8 +10,8 @@
 % code uses a vectorization approach instead of time iteration to boost 
 % computation speed. 
 %
-% Reference: Lee., H. (2022), "A Dynamically Consistent Global 
-% Nonlinear Solution Method in the Sequence Space and Applications."
+% Reference: Lee, H. (2024), "Dynamically Consistent Global Nonlinear 
+% Solutions in the Sequence Space: Theory and Applications", Working Paper.
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
