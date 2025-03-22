@@ -1,6 +1,7 @@
-The Matlab code in this folder solves a canonical RBC model with endogenous labour supply (Frisch) and aggregate uncertainty using a global nonlinear solution method in sequence space (Lee, 2024). 
+The Matlab code in this folder solves a canonical RBC model with endogenous labour supply (Frisch) and 
+aggregate uncertainty using a global nonlinear solution method in sequence space (Lee, 2024). **Hello** 
 
 
 
-Source:
-Lee, H. (2022). \textit{``A Dynamically Consistent Global Nonlinear Solution Method in the Sequence Space and Applications}.
+Reference:
+Lee, H. (2024), "Dynamically Consistent Global Nonlinear Solutions in the Sequence Space: Theory and Applications", Working Paper. 
