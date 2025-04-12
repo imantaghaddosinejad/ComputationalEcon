@@ -1,4 +1,4 @@
-% SOLVING Barillas AND Fernandez-Villaverde (1972) GENERALIZED EGM %%%%%%%%
+% SOLVING Barillas AND Fernandez-Villaverde (2007) GENERALIZED EGM %%%%%%%%
 %
 % 2024.03.22
 % AUTHOR @ IMAN TAGHADDOSINEJAD (https://github.com/imantaghaddosinejad)
