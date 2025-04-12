@@ -1,16 +1,11 @@
 % SOLVING Barillas AND Fernandez-Villaverde (2007) GENERALIZED EGM %%%%%%%%
 %
-% 2024.03.22
-% AUTHOR @ IMAN TAGHADDOSINEJAD (https://github.com/imantaghaddosinejad)
+% AUTHOR @ IMAN TAGHADDOSINEJAD (www.github.com/imantaghaddosinejad)
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Source: Barillas, F., Fernández-Villaverde, J. (2007). "A generalization 
 % of the endogenous grid method." Journal of Economic Dynamics and Control
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 
-% Algorithm:
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Housekeeping 
