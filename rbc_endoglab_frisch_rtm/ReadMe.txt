@@ -1,12 +1,11 @@
-The Matlab code in this folder solves a canonical RBC model with endogenous labour supply (Frisch) and 
-aggregate uncertainty using a global nonlinear solution method in sequence space (Lee, 2024). 
+Contains MATLAB code to globally solve a canonical RBC model with endogenous labour supply. The model is solved using the Repeated Transition Method (RTM) developed by Lee (2025).
 
-Folder Guide:
-./Functions : Folder with auxiliary functions used in the main algorithm.
-./Figures : Folder with figures after model is solved.
-./RBC_Frisch_GNLS_Slow.m : Solves the model using time loops (slow algorithm). 
-./RBC_Frisch_GNLS_Fast.m : Solves the model using vectorization instead of loops (fast algorithm). 
-./Notes.pdf : Model details.
+Directory guide:
+./RBC_Frisch_GNLS_Slow.m : Main script to solve the model using loops (slow algorithm). 
+./RBC_Frisch_GNLS_Fast.m - Main script to solve the model using vectorization (fast algorithm). 
+./Functions - Auxiliary functions used in the main script.
+./Figures - Figures relating to solution.
+./Notes.pdf - Model details.
 
 Reference:
-Lee, H. (2024), "Dynamically Consistent Global Nonlinear Solutions in the Sequence Space: Theory and Applications", Working Paper. 
+Lee, H. (2025). Global Nonlinear Solutions in Sequence Space and the Generalized Transition Function. Working Paper.
