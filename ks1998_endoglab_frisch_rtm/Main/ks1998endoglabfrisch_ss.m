@@ -1,8 +1,8 @@
 %% SOLVING KRUSELL AND SMITH (1998) WITH ENDOGENOUS LABOUR SUPPLY %%%%%%%%% 
 % 
-% 2025.11.12
 % Author @ Iman Taghaddosinejad (https://github.com/imantaghaddosinejad)
-% 
+% 2025.14.12
+%
 % This file computes the staitonary equilibrium for Krusell and Smith
 % (1998) using Policy Function Iteration + (linear) interpolation
 %
@@ -19,7 +19,7 @@ addpath('../Figures')
 
 % macro choices 
 repge = true; % interim progress report for ge loop
-irepge = 20; % number of iterations per ge interim progress report 
+irepge = 100; % number of iterations per ge interim progress report 
 distmethodeigenvc = 2; % distribution simulation method 
 %%
 %========================================
@@ -52,7 +52,7 @@ clear x y % drop intermediary variables
 vgridz = exp(vgridz);
 %%
 %========================================
-% NUMERICAL SOLUTION SETUP 
+% NUMERICAL SETUP 
 %========================================
 % equilibrium objects 
 mpolc = repmat(0.01.*vgrida', 1, p.Nz);
@@ -75,19 +75,18 @@ mlambda = zeros(size(mpolc));
 mcurrentdist = ones(p.Na,p.Nz)/(p.Na*p.Nz); % uniform initial distribution
 
 % loop parameters 
-%maxiterge = 5000;
+%maxiterge = 5000; % limit max number of GE iterations
 tol_ge = 1e-10;
 tol_dist = 1e-10;
-wt.w1 = 0.90000;
-wt.w2 = 0.90000;
-wt.w3 = 0.90000;
-wt.w4 = 0.90000;
+wt.w1 = 0.80000;
+wt.w2 = 0.80000;
+wt.w3 = 0.80000;
+wt.w4 = 0.80000;
 %% 
 %========================================
 % NUMERICAL SOLUTION 
 %========================================
-% load work-in-progress solution (last save point) 
-%load('../Solutions/wip_ks1998endolabfrisch_ss.mat')
+%load('../Solutions/wip_ks1998endolabfrisch_ss.mat') % continue from last save point
 
 %====================
 % 1. outer (ge) loop 
@@ -175,31 +174,31 @@ while errge > tol_ge %&& iterge <= maxiterge
         
         % option 2: eigenvalue method 
     elseif distmethodeigenvc == 2
-        I = zeros(p.Nz*p.Na*2*p.Nz,1); % row indices (each state (ia,iz) has 2*Nz transitions)
+        I = zeros(p.Nz*p.Na*2*p.Nz,1); % row indices (each state (ia,iz) has 2*Nz transitions due to interpolation)
         J = zeros(p.Nz*p.Na*2*p.Nz,1); % column indices 
-        V = zeros(p.Nz*p.Na*2*p.Nz,1); % values 
-        ctr = 0;   
+        V = zeros(p.Nz*p.Na*2*p.Nz,1); % values (weighted transition prob)
+        ctr = 0; % reset transition-record index (purely bookkeeping) 
         for iz = 1:p.Nz
             for ia = 1:p.Na
                 icurr = sub2ind([p.Na,p.Nz],ia,iz); % current state index 
                 aprime = mpolaprime_new(ia,iz);
                 [lb,ub,wlb,wub] = fnInterp1dGrid(aprime,vgrida,p.Na); % interpolate policy on grid
                 for izp = 1:p.Nz
-                    ctr = ctr + 1;
+                    ctr = ctr + 1; % first transition given izp (lb-case)
                     I(ctr) = icurr;
-                    J(ctr) = sub2ind([p.Na,p.Nz],lb,izp);
+                    J(ctr) = sub2ind([p.Na,p.Nz],lb,izp); % future state index lb-case 
                     V(ctr) = mtransz(iz,izp)*wlb;
                     
-                    ctr = ctr + 1;
+                    ctr = ctr + 1; % second transition given izp (ub-case)
                     I(ctr) = icurr;
-                    J(ctr) = sub2ind([p.Na,p.Nz],ub,izp);
+                    J(ctr) = sub2ind([p.Na,p.Nz],ub,izp); % future state index ub-case 
                     V(ctr) = mtransz(iz,izp)*wub;                
                 end
             end
         end
-        mtransjoint = sparse(I,J,V,p.Na*p.Nz,p.Na*p.Nz); % sparse build joint-transition matrix
+        mtransjoint = sparse(I,J,V,p.Na*p.Nz,p.Na*p.Nz); % declare sparse joint-transition matrix to efficiently handle zero entries 
         
-        % left invariant distribution (eigenvector)
+        % invariant distribution (left eigenvector)
         [eigvc,~] = eigs(mtransjoint',1);
         eigvc = real(eigvc);
         eigvc = eigvc / sum(eigvc); % normalise distribution 
@@ -229,10 +228,10 @@ while errge > tol_ge %&& iterge <= maxiterge
         'all');
 
     % updating (damped/convex)
-    K           = wt.w3*K           + (1-wt.w3)*Knew;
-    L           = wt.w4*L           + (1-wt.w4)*Lnew;
     mpolaprime  = wt.w1*mpolaprime  + (1-wt.w1)*mpolaprime_new; 
     mlambda     = wt.w2*mlambda     + (1-wt.w2)*mlambda_new; 
+    K           = wt.w3*K           + (1-wt.w3)*Knew;
+    L           = wt.w4*L           + (1-wt.w4)*Lnew;
 
     %====================
     % progress report
@@ -242,19 +241,18 @@ while errge > tol_ge %&& iterge <= maxiterge
         % report 
         fprintf('---------------------------------- \n');
         fprintf('** Market Clearing Results ** \n'); 
-        fprintf('iters_ge %d (%.2fs): err_ge = %.15f \n', iterge,timerlapsed,errge);
+        fprintf('iters_ge %d (%.2fs): err_ge = %.15f \n',iterge,timerlapsed,errge);
         fprintf('K = %.4f   L = %.4f \n',K,L);
         fprintf('r = %.4f   w = %.4f   max_lambda = %.4f \n',r,w,max(max(mlambda)));
-        %fprintf('** PFI Interim Report ** \n');
-        %fprintf('iters_pfi %d (%.2fs): err_pfi = %.15f \n',iterpfi,timerpfi,errpfi);
+        fprintf('mpolaprime_err = %.15f \n',abs(mpolaprime_err));
         if distmethodeigenvc == 1 
             fprintf('** Distribution Interim Report ** \n');
             fprintf('iters_dist %d (%.2fs): err_dist = %.15f \n',iterdist,timerdist,errdist);
         end
 
         % plot 
-        plot(vgrida,vmargdista,'LineWidth',1.5);grid on;xlim([0 100]);drawnow;
-        pause(0.2);
+        %plot(vgrida,vmargdista,'LineWidth',1.5);grid on;xlim([0 100]);drawnow;
+        %pause(0.1);
 
         % save (mid)
         save('../Solutions/wip_ks1998endolabfrisch_ss.mat');
@@ -266,3 +264,24 @@ end
 % save (final)
 %====================
 save('../Solutions/ks1998endolabfrisch_ss.mat');
+
+%%
+%========================================
+% SOLUTION ANALYSIS 
+%========================================
+load('../Solutions/ks1998endolabfrisch_ss.mat') 
+
+% wealth (marginal) distribution plot 
+figure;
+plot(vgrida,vmargdista,'LineWidth',1.5);grid on;xlim([0,100]);
+xlabel('Assets','FontSize',14);
+ylabel('Density','FontSize',14);
+saveas(gcf,'../Figures/wealth_dist_ss.jpg');
+
+% wealth-by-productivity state distribution plot 
+figure;
+plot(vgrida,mcurrentdist,'LineWidth',1.5);grid on;xlim([0,100]);
+xlabel('Assets','FontSize',14);
+ylabel('Density','FontSize',14)
+legend('z1','z2','z3','z4','z5','z6','z7','Location','northeast','FontSize',14);
+saveas(gcf,'../Figures/wealth_by_prod_dist_ss.jpg');
