@@ -6,7 +6,7 @@
 % This file computes the Recursive Competitive Equilibrium (RCE) for
 % Krusell and Smith (1998) using the Repeated Transition Method (RTM)
 % developed by Lee (2025). The RTM provides a global nonlinear solution. 
-% My extension is computational: I parralelize the backward solution step
+% My extension is computational: I parallelize the backward solution step
 % along the transition path to improve runtime performance.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% HOUSEKEEPING %%
