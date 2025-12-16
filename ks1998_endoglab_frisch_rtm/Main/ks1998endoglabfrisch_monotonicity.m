@@ -45,7 +45,7 @@ for iA = 1:p.NA
 tempK = K_t_sample(tsimpathSample==iA);
 tempRHS = squeeze(RHSsample(ik,iz,tsimpathSample==iA));
 subplot(1,2,iA);
-scatter(tempK,tempRHS,18);
+scatter(tempK,tempRHS);
 xlabel("K");
 ylabel("RHS of Euler");
 grid on;
