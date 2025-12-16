@@ -40,7 +40,7 @@ p.sigma      = 0.05;    % s.d. in individual idiosyncratic labour productivity s
 p.Nz = 7;           % number of idyiosyncratic productivity states 
 p.Na = 100;         % number of points in (capital) asset grid 
 p.agridmin = 0;     % minimum value of asset grid 
-p.agridmax = 300;   % maximum value of asset grid (set large to not bind)
+p.agridmax = 300;   % maximum value of asset grid
 p.agridcurve = 7;   % degree of coarseness in asset grid (Maliar, Maliar, and Valli, 2010)
 
 %=========================
@@ -307,3 +307,45 @@ ax = gca;
 ax.FontSize = 15; 
 set(gcf, 'Units', 'inches', 'Position', [1 1 5 4]);
 exportgraphics(gcf, '../Figures/wealth_by_prod_dist_ss.pdf', 'ContentType', 'vector');
+
+% savings policy rule
+figure;
+plot(vgrida,mpolaprime(:,1),'LineWidth',1.2);hold on;
+plot(vgrida,mpolaprime(:,end),'LineWidth',1.2);
+hold off;
+grid on;
+ylabel('Hours');
+xlabel('Assets');
+legend('Lowest z','Highest z','Location','southeast');
+ax = gca;
+ax.FontSize = 15; 
+set(gcf, 'Units', 'inches', 'Position', [1 1 5 4]);
+exportgraphics(gcf, '../Figures/savings_policy.pdf', 'ContentType', 'vector');
+
+% labour supply policy rule
+figure;
+plot(vgrida,mpoln(:,1),'LineWidth',1.2);hold on;
+plot(vgrida,mpoln(:,end),'LineWidth',1.2);
+hold off;
+grid on;
+ylabel('Hours');
+xlabel('Assets');
+legend('Lowest z','Highest z','Location','northeast');
+ax = gca;
+ax.FontSize = 15; 
+set(gcf, 'Units', 'inches', 'Position', [1 1 5 4]);
+exportgraphics(gcf, '../Figures/hours_policy.pdf', 'ContentType', 'vector');
+
+% consumption policy rule
+figure;
+plot(vgrida,mpolc(:,1),'LineWidth',1.2);hold on;
+plot(vgrida,mpolc(:,end),'LineWidth',1.2);
+hold off;
+grid on;
+ylabel('Consumption');
+xlabel('Assets');
+legend('Lowest z','Highest z','Location','southeast');
+ax = gca;
+ax.FontSize = 15; 
+set(gcf, 'Units', 'inches', 'Position', [1 1 5 4]);
+exportgraphics(gcf, '../Figures/consumption_policy.pdf', 'ContentType', 'vector');
