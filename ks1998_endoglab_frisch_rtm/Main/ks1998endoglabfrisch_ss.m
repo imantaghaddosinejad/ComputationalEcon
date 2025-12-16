@@ -3,58 +3,65 @@
 % Author @ Iman Taghaddosinejad (https://github.com/imantaghaddosinejad)
 % 2025.16.12
 %
-% This file computes the staitonary equilibrium for Krusell and Smith
-% (1998) using Policy Function Iteration + (linear) interpolation
-%
+% This file computes the stationary equilibrium for Krusell and Smith
+% (1998) using Policy Function Iteration + (linear) interpolation.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% 
-%========================================
-% HOUSEKEEPING
-%========================================
+%% HOUSEKEEPING %%
+
 close all;
 clc;
 clear variables;
 addpath('../Functions')
 addpath('../Figures')
 
-% declare macro 
+%=========================
+% declare macros 
+%=========================
 repge = true; % interim progress report for ge loop
 irepge = 100; % number of iterations per ge interim progress report 
 distmethodeigenvc = 2; % distribution simulation method 
-%%
-%========================================
-% MODEL FUNDAMENTALS 
-%========================================
+
+%% MODEL FUNDAMENTALS %%
+
+%=========================
 % model parameters 
+%=========================
 p.alpha      = 0.36;    % capital factor share of output 
 p.beta       = 0.99;    % time-discount factor 
 p.delta      = 0.025;   % capital depreciation rate 
 p.frisch     = 1.00;    % Frisch elasticity of labour supply (this is fixed to 1.00 in computation)
 p.eta        = 7.60;    % disutility of labour supply term 
-p.rho        = 0.90;    % persistence in individual idyiosyncratic labour productivity shock
-p.sigma      = 0.05;    % s.d. in individual idyiosyncratic labour productivity shock
+p.rho        = 0.90;    % persistence in individual idiosyncratic labour productivity shock
+p.sigma      = 0.05;    % s.d. in individual idiosyncratic labour productivity shock
 
+%=========================
 % numerical parameters 
+%=========================
 p.Nz = 7;           % number of idyiosyncratic productivity states 
 p.Na = 100;         % number of points in (capital) asset grid 
 p.agridmin = 0;     % minimum value of asset grid 
 p.agridmax = 300;   % maximum value of asset grid (set large to not bind)
 p.agridcurve = 7;   % degree of coarseness in asset grid (Maliar, Maliar, and Valli, 2010)
 
+%=========================
 % wealth grid 
+%=========================
 x = linspace(0,0.5,p.Na);
 y = x.^p.agridcurve / max(x.^p.agridcurve);
 vgrida = p.agridmin + (p.agridmax-p.agridmin).*y;
 clear x y % drop intermediary variables 
 
+%=========================
 % individual productivity grid 
+%=========================
 [vgridz, mtransz, ~] = fnTauchen(p.rho, p.sigma, 0.0, p.Nz);
 vgridz = exp(vgridz);
-%%
-%========================================
-% NUMERICAL SETUP 
-%========================================
+
+%% NUMERICAL SETUP %%
+
+%=========================
 % equilibrium objects 
+%=========================
 mpolc = repmat(0.01.*vgrida', 1, p.Nz);
 mpoln = zeros(size(mpolc));
 mpolaprime_new = zeros(size(mpolc)); 
@@ -63,18 +70,24 @@ Knew = 0;
 Lnew = 0; 
 A = 1.0; % tfp
 
+%=========================
 % auxillary objects 
+%=========================
 mgrida = repmat(vgrida', 1, p.Nz); 
 mgridz = repmat(vgridz', p.Na, 1);
 
+%=========================
 % initial guess 
+%=========================
 K = 36.5;
 L = 0.33;
 mpolaprime = zeros(size(mpolc));
 mlambda = zeros(size(mpolc));
 mcurrentdist = ones(p.Na,p.Nz)/(p.Na*p.Nz); % uniform initial distribution
 
+%=========================
 % loop parameters 
+%=========================
 %maxiterge = 5000; % limit max number of GE iterations
 tol_ge = 1e-10;
 tol_dist = 1e-10;
@@ -82,15 +95,17 @@ wt.w1 = 0.80000;
 wt.w2 = 0.80000;
 wt.w3 = 0.80000;
 wt.w4 = 0.80000;
-%% 
-%========================================
-% NUMERICAL SOLUTION 
-%========================================
-%load('../Solutions/wip_ks1998endolabfrisch_ss.mat') % continue from last save point
 
-%====================
+%% NUMERICAL SOLUTION %%
+
+%=========================
+% continue from last save point
+%=========================
+% load('../Solutions/wip_ks1998endolabfrisch_ss.mat')
+
+%=========================
 % 1. outer (ge) loop 
-%====================
+%=========================
 errge = 10;
 iterge = 1;
 timerge = tic; 
@@ -100,9 +115,9 @@ while errge > tol_ge %&& iterge <= maxiterge
     r = p.alpha * A * (K/L)^(p.alpha-1) - p.delta;
     w = (1-p.alpha) * A * (K/L)^p.alpha;
 
-    %====================
+    %=========================
     % 2. pfi step
-    %====================
+    %=========================
     % simultaneously update policy functions with prices to boost speed and
     % improve GE convergence stability. Within each GE step do one PFI
     % (view this as a Howard-style improvement). 
@@ -145,10 +160,11 @@ while errge > tol_ge %&& iterge <= maxiterge
     mpolc       = c; % jump update 
     mpoln       = n; % jump update 
     
-    %====================
+    %=========================
     % 3. stationary distribution (non-stochastic simulation)
-    %====================
+    %=========================
     timerdist = tic;
+
     % option 1: histogram method
     if distmethodeigenvc == 1 
         errdist = 10;
@@ -208,16 +224,16 @@ while errge > tol_ge %&& iterge <= maxiterge
     end
     timerdist = toc(timerdist); 
     
-    %====================
+    %=========================
     % 4. compute aggregates (mcc)
-    %====================
+    %=========================
     vmargdista = sum(mcurrentdist,2);
     Knew = vgrida*vmargdista; 
     Lnew = sum(mgridz.*mpoln.*mcurrentdist,'all');
 
-    %====================
+    %=========================
     % 5. updating (ge)
-    %====================
+    %=========================
     % error (ge) 
     mpolaprime_err = sum(mpolaprime_new.*mcurrentdist,'all') - sum(mpolaprime.*mcurrentdist,'all');
     mlambda_err = sum(mlambda_new.*mcurrentdist,'all') - sum(mlambda.*mcurrentdist,'all');
@@ -233,9 +249,9 @@ while errge > tol_ge %&& iterge <= maxiterge
     K           = wt.w3*K           + (1-wt.w3)*Knew;
     L           = wt.w4*L           + (1-wt.w4)*Lnew;
 
-    %====================
+    %=========================
     % progress report
-    %====================
+    %=========================
     timerlapsed = toc(timerge);
     if repge == true && (mod(iterge, irepge) == 0 || iterge == 1 || errge <= tol_ge)
         % report 
@@ -260,15 +276,15 @@ while errge > tol_ge %&& iterge <= maxiterge
     iterge = iterge+1;
 end
 
-%====================
+%=========================
 % save (final)
-%====================
+%=========================
 save('../Solutions/ks1998endolabfrisch_ss.mat');
 
 %%
-%========================================
-% SOLUTION ANALYSIS 
-%========================================
+%=========================
+% solution report 
+%=========================
 load('../Solutions/ks1998endolabfrisch_ss.mat') 
 
 % wealth (marginal) distribution plot 
@@ -280,7 +296,6 @@ ax = gca;
 ax.FontSize = 15; 
 set(gcf, 'Units', 'inches', 'Position', [1 1 5 4]);
 exportgraphics(gcf, '../Figures/wealth_dist_ss.pdf', 'ContentType', 'vector');
-
 
 % wealth-by-productivity state distribution plot 
 figure;
