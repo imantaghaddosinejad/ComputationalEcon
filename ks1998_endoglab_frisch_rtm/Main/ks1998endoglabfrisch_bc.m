@@ -335,7 +335,6 @@ while err_ge > tol_ge
     %    Lnew_t(win_t) - L_t(win_t);...
     %    lambda_new_t(win_t) - lambda_t(win_t)].^2),'all'));
 
-
     % update 
     K_t             = wt.w1*K_t             + (1-wt.w1)*Knew_t;
     L_t             = wt.w2*L_t             + (1-wt.w2)*Lnew_t;
