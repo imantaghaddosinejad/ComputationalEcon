@@ -7,6 +7,9 @@
 % Krusell and Smith (1998) using the Repeated Transition Method (RTM)
 % developed by Lee (2025). The RTM provides a global nonlinear solution.
 %
+% Reference:
+% Lee, H. (2025). "Global Nonlinear Solutions in Sequence Space and the 
+% Generalized Transition Function."
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% HOUSEKEEPING %%
 

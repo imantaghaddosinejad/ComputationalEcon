@@ -8,6 +8,10 @@
 % developed by Lee (2025). The RTM provides a global nonlinear solution. 
 % My extension is computational: I parallelize the backward solution step
 % along the transition path to improve runtime performance.
+%
+% Reference:
+% Lee, H. (2025). "Global Nonlinear Solutions in Sequence Space and the 
+% Generalized Transition Function."
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% HOUSEKEEPING %%
 
@@ -15,6 +19,7 @@ close all;
 clc;
 clear variables;
 addpath('../Functions')
+addpath('../Solutions')
 addpath('../Figures')
 
 %=========================
@@ -375,7 +380,7 @@ while err_ge > tol_ge
         %pause(0.1);
 
         % save (mid)
-        save('../Solutions/wip_ks1998endolabfrisch_bs.mat');
+        save('../Solutions/wip_ks1998endolabfrisch_bc.mat');
     end
     iter_ge = iter_ge+1;
 end
@@ -394,12 +399,12 @@ w_t = (1-p.alpha)*vgridA(ishock_t)'.*(K_t(1:T)./L_t).^p.alpha;
 %=========================
 % save (final)
 %=========================
-save('../Solutions/ks1998endolabfrisch_bs.mat');
+save('../Solutions/ks1998endolabfrisch_bc.mat');
 %%
 %=========================
 % solution report
 %=========================
-load('../Solutions/ks1998endolabfrisch_bs.mat');
+load('../Solutions/ks1998endolabfrisch_bc.mat');
 
 % HP-filter log series
 [~,Y_hp]    = hpfilter(log(Y_t(burnin+1:T)),'Smoothing',1600);
