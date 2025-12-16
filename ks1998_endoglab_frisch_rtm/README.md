@@ -6,8 +6,8 @@ Contains MATLAB code to globally solve Krusell and Smith (1998) with endogenous 
 `./Main/ks1998endoglabfrisch_bc.m` - Script to globally solve dynamic model using parallelization.  
 `./Main/ks1998endoglabfrisch_sequential_bc.m` - Script to globally solve dynamic model using sequential approach.  
 `./Functions` - Auxiliary functions used across main scripts.  
-`./Solutions` - All relevant solutions as matlab data files.  
-`./Figures` - Relevant figures for the solution.  
+`./Solutions` - All relevant solutions as MATLAB data files.  
+`./Figures` - Relevant figures for solutions.  
 
 ### References
 Krusell, P., & Smith, A. A. Jr. (1998). Income and Wealth Heterogeneity in the Macroeconomy. Journal of Political Economy, 106(5), 867-896.  
