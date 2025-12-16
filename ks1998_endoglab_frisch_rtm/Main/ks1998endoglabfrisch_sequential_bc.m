@@ -50,7 +50,7 @@ mtransA = [0.875,0.125;0.125,0.875];
 %=========================
 % set transition path
 %=========================
-Tlen = 4000; % total length of transition path (+1 to anchor t=1 to steady-state)
+Tlen = 4001; % total length of transition path (+1 to anchor t=1 to steady-state)
 burnin = 500; % burnin period length to for ergodicity 
 T = Tlen + burnin;
 itransp = [(2:T)';T]; % set t=T+1 off-the-transition path to repeat final period (anchor on t=T)
@@ -354,7 +354,7 @@ while err_ge > tol_ge
         %pause(0.1);
 
         % save (mid)
-        % save('../Solutions/wip_ks1998endolabfrisch_bs.mat');
+        save('../Solutions/wip_ks1998endolabfrisch_bs.mat');
     end
     iter_ge = iter_ge+1;
 end
@@ -372,7 +372,7 @@ w_t = (1-p.alpha)*vgridA(ishock_t)'.*(K_t(1:T)./L_t).^p.alpha;
 %=========================
 % save (final)
 %=========================
-% save('../Solutions/ks1998endolabfrisch_bs.mat');
+save('../Solutions/ks1998endolabfrisch_bs.mat');
 %%
 %=========================
 % solution report

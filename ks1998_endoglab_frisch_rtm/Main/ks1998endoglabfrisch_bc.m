@@ -128,10 +128,10 @@ mgridz = ss.mgridz;
 %=========================
 % initialize parallel pool
 %=========================
-% start parallel pool with 10 workers.
+% start parallel pool with 6 workers.
 % given large broadcasting overhead fewer workers than cpu cores may be
 % optimal. adjust this given machine specs.
-parpool(10);
+parpool(6);
 
 %=========================
 % continue from last save point
