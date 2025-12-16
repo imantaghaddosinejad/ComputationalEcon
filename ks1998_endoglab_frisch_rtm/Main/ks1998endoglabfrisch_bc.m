@@ -49,7 +49,7 @@ mtransA = [0.875,0.125;0.125,0.875];
 % set transition path
 %=========================
 Tlen = 4001; % total length of transition path (+1 to anchor t=1 to steady-state)
-burnin = 500; % burnin period length to for ergodicity 
+burnin = 500; % burnin period length for ergodicity 
 T = Tlen + burnin;
 itransp = [(2:T)';T]; % set t=T+1 off-the-transition path to repeat final period (anchor on t=T)
 win_t = ((burnin+1):(T-burnin))'; % compute ge errors over non-burnin periods along transition path
@@ -190,7 +190,7 @@ while err_ge > tol_ge
                     % find period where capital stock is closest
                     Klow = sum(can<Kprime); % period capital stock is closest to Kprime from below 
                     Klow(Klow<=1) = 1; % snap to first period if location is below candidate set 
-                    Klow(Klow>=length(index)) = length(index)-1; % snap to second to last period if locaiton is above candidate set
+                    Klow(Klow>=length(index)) = length(index)-1; % snap to second to last period if location is above candidate set
                     Khigh = Klow+1; % period capital stock is closest to Kprime from above
                     weightlow = (can(Khigh)-Kprime)/(can(Khigh)-can(Klow)); % linear interpolation weight on lower side
                     weightlow(weightlow<0) = 0; % snap to upper bound if Kprime is above candidate set 
@@ -276,7 +276,7 @@ while err_ge > tol_ge
     end
 
     %=========================
-    % 3. non-stochastic smulation
+    % 3. non-stochastic simulation
     %=========================
     % reset placeholders 
     Knew_t = zeros(size(K_t)); 
