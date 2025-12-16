@@ -1,7 +1,7 @@
 %% SOLVING KRUSELL AND SMITH (1998) WITH ENDOGENOUS LABOUR SUPPLY %%%%%%%%% 
 % 
 % Author @ Iman Taghaddosinejad (https://github.com/imantaghaddosinejad)
-% 2025.14.12
+% 2025.16.12
 %
 % This file computes the staitonary equilibrium for Krusell and Smith
 % (1998) using Policy Function Iteration + (linear) interpolation
@@ -17,7 +17,7 @@ clear variables;
 addpath('../Functions')
 addpath('../Figures')
 
-% macro choices 
+% declare macro 
 repge = true; % interim progress report for ge loop
 irepge = 100; % number of iterations per ge interim progress report 
 distmethodeigenvc = 2; % distribution simulation method 
@@ -276,7 +276,11 @@ figure;
 plot(vgrida,vmargdista,'LineWidth',1.5);grid on;xlim([0,100]);
 xlabel('Assets','FontSize',14);
 ylabel('Density','FontSize',14);
-saveas(gcf,'../Figures/wealth_dist_ss.jpg');
+ax = gca;
+ax.FontSize = 15; 
+set(gcf, 'Units', 'inches', 'Position', [1 1 5 4]);
+exportgraphics(gcf, '../Figures/wealth_dist_ss.pdf', 'ContentType', 'vector');
+
 
 % wealth-by-productivity state distribution plot 
 figure;
@@ -284,4 +288,7 @@ plot(vgrida,mcurrentdist,'LineWidth',1.5);grid on;xlim([0,100]);
 xlabel('Assets','FontSize',14);
 ylabel('Density','FontSize',14)
 legend('z1','z2','z3','z4','z5','z6','z7','Location','northeast','FontSize',14);
-saveas(gcf,'../Figures/wealth_by_prod_dist_ss.jpg');
+ax = gca;
+ax.FontSize = 15; 
+set(gcf, 'Units', 'inches', 'Position', [1 1 5 4]);
+exportgraphics(gcf, '../Figures/wealth_by_prod_dist_ss.pdf', 'ContentType', 'vector');
